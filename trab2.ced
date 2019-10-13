@@ -1,0 +1,1224 @@
+;**********************************************************
+;
+; Programa de Refer?ncia para desenvolvimento da aplica??o 
+;
+;                        2019/2
+;
+;                Lisboa, Rafael e Cechin
+;
+;**********************************************************
+;
+;=============================================================
+;		Endere?os para a aplica??o e para o _SISTEMA
+;=============================================================
+_APP:		equ		h0100 ; (256)
+_SISTEMA:	equ		h0080 ; (128)
+
+;
+;=============================================================
+;		Fun??es de _SISTEMA
+;
+;		Forma de Chamada:
+;			mov	#codigo_da_funcao,r5
+;			jsr	r7,_SISTEMA
+;=============================================================
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Informa se foi digitada alguma tecla. N?o bloqueia.
+;Entra:		-
+;Retorna:	R0==0, se nada foi digitado.
+;		R0!=0, se algo foi digitado.
+;-------------------------------------------------------------
+kbhit:		equ		0
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Bloqueia, esperando que seja digitada uma tecla.
+;		N?o coloca o caractere no visor.
+;Entra:		-
+;Retorna:	R0 = c?digo ASCII do caractere da tecla digitada.
+;-------------------------------------------------------------
+getchar:	equ		1
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Coloca um caractere no visor.
+;		O caractere ser? colocado na posi??o atual do cursor, o qual ser? incrementado.
+;		Ao receber um caractere BS - Back Space (8), o cursor ? movido uma posi??o 
+; 		para a esquerda, apagando o caractere anterior.
+;Entra:		R0 = c?digo ASCII do caractere a ser colocado no visor
+;Retorna:	-
+;-------------------------------------------------------------
+putchar:	equ		2
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Coloca um string tipo C no visor.
+;		O string ? formado por bytes ASCII, terminado por "\0"? (0).
+;		O string ser? colocado no visor a partir da posi??o atual do cursor.
+;Entra:		R0 = ponteiro para o string do tipo "C"
+;Retorna:	-
+;-------------------------------------------------------------
+putmsg:		equ		3
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Move o cursor para a posi??o desejada.
+;Entra:		R0 = nova posi??o para o cursor.
+;		Esse valor deve estar entre 0 e 35. 
+;		Outros valores far?o com que o cursor desapare?a do visor.
+;Retorna:	-
+;-------------------------------------------------------------
+setcursor:	equ		4
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Seleciona a parede de trabalho
+;Entra: 	R0 = n?mero da parede.
+;Retorna:	R0 = largura da parede (abcissas - coordenadas "X"?)
+;		R1 = altura da parede (ordenadas - coordenadas "Y"?)
+;		Se o n?mero da parede fornecido for inv?lido, devolve R0 = R1 = -1 (HFFFF)
+;-------------------------------------------------------------
+setwall:	equ		5
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Solicita informa??o sobre o estado de um ladrilho.
+;Entra: 	R0 = diferen?a da coordenada X"?, em rela??o ? posi??o atual da c?mera.
+;		R1 = diferen?a da coordenada "Y"?, em rela??o ? posi??o atual da c?mera.
+;		Esses valores podem ser +1, -1 ou 0.
+;Retorna:	R0 = o estado do ladrilho. 
+;		Esses valores podem ser:
+;		0 = ladrilho n?o usado
+;		1 = ladrilho em boas condi??es
+;		2 = ladrilho danificado
+;		3 = coordenadas fora da parede
+;-------------------------------------------------------------
+read:		equ		6
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Move a c?mera para as coordenadas (0,0) da parede.
+;Entra:		-
+;Retorna:	-
+;-------------------------------------------------------------
+move00:		equ		7
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Move a c?mera. Uma vez chamada a fun??o, deve-se aguardar o encerramento do comando antes de enviar novo comando de movimenta??o.
+;		O deslocamento da c?mera ocorre na horizontal ou na vertical (nunca na diagonal).
+;		O deslocamento da c?mera demora T = 100ms + (NL-1) x 50ms, onde NL ? o n?mero de ladrilhos total do movimento comandado.
+;Entra: 	R0 = diferen?a da coordenada "X"?, em rela??o ?posi??o atual da c?mera, para deslocar a c?mera
+;		R1 = diferen?a da coordenada "Y"?, em rela??o ?posi??o atual da c?mera, para deslocar a c?mera
+;		Esses valores podem ser +2, -2, +1, -1 ou 0.
+;Retorna:	0, se n?o houve erro
+;		-1, se houve erro (ex: par?metros de entrada inv?lidos)
+;-------------------------------------------------------------
+move:		equ		8
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Informa se a c?mera est? em movimento.
+;Entra:		-
+;Retorna:	R0 == 0, se a c?mera est? parada.
+;		R0 != 0, se a c?mera est? em movimento.
+;-------------------------------------------------------------
+moving:		equ		9
+
+;
+;-------------------------------------------------------------
+;Fun??o:	Informa as coordenadas atuais da c?mera.
+;		Essa informa??o s? ? v?lida se a c?mera estiver parada.
+;Entra:		-
+;Retorna:	R0 = coordenada "X"? da c?mera
+;		R1 = coordenada "Y" da c?mera
+;		Se a c?mera estiver em movimento, ser? devolvido R0 = R1 = -1 (HFFFF)
+;-------------------------------------------------------------
+getcamera:	equ		10
+
+;
+;=============================================================
+;		In?cio do programa de aplica??o
+;=============================================================
+; defini??o de constantes (c?digos ASCII de caracteres especiais)
+ENTER:		equ		13
+BACKSPACE:	equ		08
+ESCAPE:		equ		27
+letraC:		equ		99
+letraC2:	equ		67
+;
+		org		_APP
+;************************************************
+;
+; A PARTIR DAQUI COLOQUE O C?DIGO DE SUA SOLU??O	
+;
+;************************************************
+
+
+; mostra mensagem do autor
+
+mensagemAutor:
+	mov #autor, r0
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+; pede tecla para proxima tela
+
+continua1:
+	jsr r7, pegarTecla
+
+
+; checa se é enter
+
+checaTecla:
+	cmp r3, #1
+	beq numParede
+	br continua1
+	
+
+; pede o número da parede
+
+numParede:
+	
+	jsr r7, limpaTela
+
+	mov #pedeParede, r0
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+	clr r3
+
+
+LoopNumeroParede:
+	mov #getchar, r5
+	jsr r7,_SISTEMA
+
+	cmp r0, #ENTER
+	beq ehEnterNumParede
+
+	cmp r0, #BACKSPACE
+	beq ehBackspace
+
+	mov #putchar, r5
+	jsr r7, _SISTEMA
+
+	sub #48, r0
+
+	jsr r7, Multiplica
+	jmp LoopNumeroParede
+
+
+Multiplica:	;multiplica valor por 10
+
+	
+	mov #9, r5
+	mov r3, r4
+
+loopMult:
+	add r4,r3
+	sob r5, loopMult
+
+	add r0, r3
+
+	rts r7
+
+
+	
+ehBackspace:
+
+	cmp 65526, #32
+	beq LoopNumeroParede
+	cmp 65526, #95
+	beq LoopNumeroParede
+
+	mov #putchar, r5
+	jsr r7, _SISTEMA
+
+	mov #32, r0
+	mov #putchar, r5
+	jsr r7, _SISTEMA
+
+	mov #BACKSPACE, r0
+	mov #putchar, r5
+	jsr r7, _SISTEMA
+
+
+	clr r3
+
+	mov #65526, r4
+	
+LoopBackspace:
+
+	cmp (r4), #32
+	beq LoopNumeroParede
+	cmp (r4), #95
+	beq LoopNumeroParede
+	
+
+	mov #9, r5
+	mov r3, r0
+
+	
+prox: 
+	add r0,r3
+	sob r5, prox
+
+	add (r4), r3
+	sub #48, r3
+
+	inc r4
+
+	
+	br LoopBackspace
+
+
+	
+	
+ehEnterNumParede:
+
+	cmp 65526, #32
+	beq Encerra1
+	cmp 65526, #95
+	beq Encerra1
+
+
+	mov r3, numeroParede
+	mov r3, paredeGLOBAL
+	br verificaParede
+
+
+Encerra1:
+	jsr r7, LimpaTela
+	mov #encerra, r0
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+	hlt
+	
+	
+verificaParede:
+	
+	mov numeroParede, r0
+
+	mov #setwall, r5
+	jsr r7, _SISTEMA
+
+	cmp r0, #-1
+	bne valida
+
+	jsr r7, limpaTela
+	
+	mov #mensagemErro, r0
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+	jmp continua1
+
+valida: ; mostra informacoes da parede
+
+	
+
+	jsr r7, limpaTela
+
+
+	mov numeroParede, r0 ;salva parede largura e altura
+	mov #setwall, r5
+	jsr r7, _SISTEMA
+
+	mov r0, largura
+	mov r0, larguraGLOBAL
+	mov r1, altura
+	mov r1, alturaGLOBAL
+
+valida2:
+	mov #informacaoParede1, r0
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+	clr dezenas
+	clr unidades
+
+loopFormato:  ;formata as unidades para o usuario
+
+	cmp numeroParede, #10
+	blt unidades1
+	sub #10, numeroParede	
+	add #1, dezenas
+	br loopFormato
+
+unidades1:
+	mov numeroParede, unidades	
+
+
+	
+	add #48, dezenas		;mostra numero da parede
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+
+
+	mov #informacaoParede2, r0  ;mostra numero largura
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+	clr dezenas
+	clr unidades
+
+
+loopFormato2:
+	cmp largura, #10
+	blt unidades2
+	sub #10, largura	
+	add #1, dezenas
+	br loopFormato2
+
+unidades2:
+	mov largura, unidades
+
+
+	add #48, dezenas
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	mov #informacaoParede2, r0  ;mostra numero largura
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+	clr dezenas
+	clr unidades
+
+
+loopFormato3:
+	cmp altura, #10
+	blt unidades3
+	sub #10, altura	
+	add #1, dezenas
+	br loopFormato3
+
+unidades3:
+	mov altura, unidades
+
+	add #48, dezenas
+
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+
+	jsr r7, pegarTecla
+
+	cmp r3, #1
+	beq move1
+
+	jmp numParede
+
+
+; loop principal
+
+
+
+move1:
+
+	clr milhares
+	clr centenas
+	clr dezenas
+	clr unidades
+	clr bons
+	clr danificados
+	clr vazios
+	
+	mov #move00,r5
+	jsr r7, _SISTEMA
+
+	mov #1, sentido
+
+
+
+loopCamera:
+
+
+	mov #kbhit, r5
+	jsr r7, _SISTEMA
+
+	cmp r0, #0
+	beq continuaCamera
+
+
+	mov #getchar, r5
+	jsr r7,_SISTEMA
+
+	cmp r0, #letraC
+
+	bne testaC2
+
+	jsr r7, limpaTela
+
+	mov paredeGLOBAL, numeroParede
+	mov larguraGLOBAL, largura
+	mov alturaGLOBAL, altura
+
+	jmp valida2
+
+
+testaC2:
+
+	cmp r0, #letraC2
+	bne continuaCamera
+
+	jsr r7, limpaTela
+
+	mov paredeGLOBAL, numeroParede
+	mov larguraGLOBAL, largura
+	mov alturaGLOBAL, altura
+
+	jmp valida2
+
+
+continuaCamera:
+	
+
+	mov #moving, r5
+	jsr r7, _SISTEMA
+
+	cmp r0, #0
+	beq parada
+
+	jmp loopCamera
+
+parada:
+	
+
+	clr r0
+	clr r1
+
+	
+	mov #read, r5
+	jsr r7, _SISTEMA
+
+	
+	
+	cmp r0,#3
+	bne aqui1
+
+
+	jmp lateralmenteFim
+
+aqui1:
+
+	clr dezenas
+	clr unidades
+	jsr r7,limpaTela         ;; leu ladrilho existente
+
+	clr r0
+	clr r1
+
+	
+	mov #read, r5
+	jsr r7, _SISTEMA
+
+	cmp r0, #0
+	bne aqui2
+	jmp vazioAtual
+
+aqui2:
+	cmp r0, #1
+	bne aqui3
+	jmp bomAtual
+
+
+aqui3:
+
+	add #1, danificados
+
+	mov #coordenadasDanificado,r0
+	mov #putmsg, r5			;;ruim
+	jsr r7,_SISTEMA
+
+	mov #getcamera, r5
+	jsr r7,_SISTEMA
+
+	mov r0, coordenadaX
+	mov r1, coordenadaY
+
+
+
+loopFormatoCoordX1:
+	cmp coordenadaX, #10
+	blt unidadesCoordX1
+	sub #10, coordenadaX	
+	add #1, dezenas
+	br loopFormatoCoordX1
+
+unidadesCoordX1:
+	mov coordenadaX, unidades
+
+
+	add #48, dezenas
+
+
+	mov #13, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov #14, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	clr dezenas
+	clr unidades
+
+
+loopFormatoCoordY1:
+	cmp coordenadaY, #10
+	blt unidadesCoordY1
+	sub #10, coordenadaY	
+	add #1, dezenas
+	br loopFormatoCoordY1
+
+unidadesCoordY1:
+	mov coordenadaY, unidades
+
+
+	add #48, dezenas
+
+
+	mov #16, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov #17, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+
+	clr dezenas
+	clr unidades
+
+	jmp localVerificado
+
+
+
+
+vazioAtual:
+
+	add #1, vazios
+
+	mov #coordenadasVazio,r0
+	mov #putmsg, r5			;;vazio
+	jsr r7,_SISTEMA
+
+	mov #getcamera, r5
+	jsr r7,_SISTEMA
+
+	mov r0, coordenadaX
+	mov r1, coordenadaY
+
+
+
+loopFormatoCoordX2:
+	cmp coordenadaX, #10
+	blt unidadesCoordX2
+	sub #10, coordenadaX	
+	add #1, dezenas
+	br loopFormatoCoordX2
+
+unidadesCoordX2:
+	mov coordenadaX, unidades
+
+
+	add #48, dezenas
+
+
+	mov #13, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov #14, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	clr dezenas
+	clr unidades
+
+
+loopFormatoCoordY2:
+	cmp coordenadaY, #10
+	blt unidadesCoordY2
+
+	sub #10, coordenadaY	
+	add #1, dezenas
+	br loopFormatoCoordY2
+
+unidadesCoordY2:
+	mov coordenadaY, unidades
+
+
+	add #48, dezenas
+
+
+	mov #16, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov #17, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+
+	clr dezenas
+	clr unidades
+
+	jmp localVerificado
+
+
+
+	
+
+bomAtual:
+
+	add #1, bons
+	
+
+	mov #coordenadasBom,r0
+	mov #putmsg, r5			;;bom
+	jsr r7,_SISTEMA
+
+	mov #getcamera, r5
+	jsr r7,_SISTEMA
+
+	mov r0, coordenadaX
+	mov r1, coordenadaY
+
+	mov r0, r4
+
+loopFormatoCoordX3:
+	cmp coordenadaX, #10
+	blt unidadesCoordX3
+	sub #10, coordenadaX	
+	add #1, dezenas
+	br loopFormatoCoordX3
+
+unidadesCoordX3:
+	mov coordenadaX, unidades
+
+
+	add #48, dezenas
+
+
+	mov #13, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov #14, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	clr dezenas
+	clr unidades
+
+
+loopFormatoCoordY3:
+	cmp coordenadaY, #10
+	blt unidadesCoordY3
+	sub #10, coordenadaY	
+	add #1, dezenas
+	br loopFormatoCoordY3
+
+unidadesCoordY3:
+	mov coordenadaY, unidades
+
+
+	add #48, dezenas
+
+
+	mov #16, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov #17, r0
+	mov #setcursor, r5
+	jsr r7,_SISTEMA
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+
+	clr dezenas
+	clr unidades
+
+	jmp localVerificado
+
+
+
+
+localVerificado:	
+	
+	mov #getcamera, r5
+	jsr r7,_SISTEMA
+
+	add #1, r0
+
+	cmp r0, larguraGLOBAL
+	beq lateralmenteFimDireita
+	cmp r0, #1
+	beq lateralmenteFimEsquerda
+
+volta:	mov sentido, r0
+	clr r1
+
+
+	mov #move,r5
+	jsr r7,_SISTEMA
+
+
+	jmp loopCamera
+
+lateralmenteFimEsquerda:
+	cmp sentido, #-1
+	beq lateralmenteFim
+	br volta
+
+lateralmenteFimDireita:
+	cmp sentido, #1
+	beq lateralmenteFim
+	br volta
+
+
+lateralmenteFim:
+	
+	
+	neg sentido	
+
+
+	mov #getcamera, r5
+	jsr r7,_SISTEMA
+
+	add #1, r1
+	cmp r1, alturaGLOBAL
+
+	beq fim
+	
+	clr r0
+	mov #1, r1	
+
+	mov #move, r5
+	jsr r7,_SISTEMA
+
+	jmp loopCamera
+
+
+fim:	jmp mostraResultados
+	
+
+		 
+	
+
+
+mostraResultados:
+
+	jsr r7,limpaTela
+
+	mov #resultado1, r0
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+	cmp bons, #10000
+	bne loopFormatoResult1
+	mov #dezmil,r0
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+	jmp loopFormatoResult2
+
+loopFormatoResult1:  ;formata as unidades para o usuario
+
+
+	cmp bons, #1000
+	blt centenasResult1
+	sub #1000, bons	
+	add #1, milhares
+	br loopFormatoResult1
+
+centenasResult1:
+	cmp bons, #100
+	blt dezenasResult1
+	sub #100, bons	
+	add #1, centenas
+	br centenasResult1	
+
+dezenasResult1:
+	cmp bons, #10
+	blt unidadesResult1
+	sub #10, bons	
+	add #1, dezenas
+	br dezenasResult1
+
+unidadesResult1:
+	mov bons, unidades	
+
+
+	add #48, milhares		;mostra numero de bons
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48,centenas		
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	
+	add #48, dezenas		
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+
+
+	mov #resultado2, r0  
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+
+	clr milhares
+	clr centenas
+	clr dezenas
+	clr unidades
+
+
+loopFormatoResult2:
+
+	cmp danificados, #10000
+	bne ca1
+	mov #dezmil,r0
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+	jmp loopFormatoResult3
+ca1:
+
+
+	cmp danificados, #1000
+	blt centenasResult2
+	sub #1000, danificados	
+	add #1, milhares
+	br loopFormatoResult2
+
+centenasResult2:
+	cmp danificados, #100
+	blt dezenasResult2
+	sub #100, danificados
+	add #1, centenas
+	br centenasResult2
+
+dezenasResult2:
+	cmp danificados, #10
+	blt unidadesResult2
+	sub #10, danificados
+	add #1, dezenas
+	br dezenasResult2
+
+unidadesResult2:
+	mov danificados, unidades	
+
+
+	add #48, milhares		;mostra numero de danificados
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48,centenas		
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	
+	add #48, dezenas		
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+
+
+	mov #resultado3, r0  ;mostra numero de vazios
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+
+	clr milhares
+	clr centenas
+	clr dezenas
+	clr unidades
+
+
+loopFormatoResult3:
+
+	cmp danificados, #10000
+	bne ca2
+	
+	mov #dezmil,r0
+	mov #putmsg, r5
+	jsr r7, _SISTEMA
+
+	jmp fimResultados
+ca2:
+	cmp vazios, #1000
+	blt centenasResult3
+	sub #1000, vazios	
+	add #1, milhares
+	br loopFormatoResult3
+
+centenasResult3:
+	cmp vazios, #100
+	blt dezenasResult3
+	sub #100, vazios
+	add #1, centenas
+	br centenasResult3
+
+dezenasResult3:
+	cmp vazios, #10
+	blt unidadesResult3
+	sub #10, vazios
+	add #1, dezenas
+	br dezenasResult3
+
+unidadesResult3:
+	mov vazios, unidades	
+
+
+	add #48, milhares		;mostra numero de vazios
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48,centenas		
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	
+	add #48, dezenas		
+
+	mov dezenas, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+	add #48, unidades
+
+	mov unidades, r0
+	mov #putchar, r5
+	jsr r7,_SISTEMA
+
+
+
+	clr milhares
+	clr centenas
+	clr dezenas
+	clr unidades
+
+
+fimResultados:
+	clr bons
+	clr danificados
+	clr vazios
+
+tentadenovo:
+	jsr r7, pegarTecla
+
+
+; checa se é enter
+	cmp r3, #1
+	beq voltaParede
+	br tentadenovo
+
+voltaParede:
+	jmp numParede
+
+
+
+
+
+
+
+pegarTecla:
+	mov #getchar, r5
+	jsr r7,_SISTEMA
+
+	cmp r0, #ENTER
+	beq ehEnter
+	cmp r0, #letraC
+	beq ehC
+	cmp r0, #letraC2
+	beq ehC
+
+	br pegarTecla
+
+ehEnter:
+	mov #1, R3
+	br retornoTecla
+ehC:
+	mov #2, R3
+
+retornoTecla:
+	rts r7
+
+	
+
+limpaTela:
+	mov #0, r0
+	mov #setcursor, r5
+	jsr r7, _SISTEMA
+	mov #limpa, r0
+	mov #putmsg, r5
+	jsr r7,_SISTEMA
+	mov #0, r0
+	mov #setcursor, r5
+	jsr r7, _SISTEMA
+	
+	rts r7
+	
+
+
+
+
+
+
+autor: dab 'Autor: Bruno C. Cartao: 00313550', 0
+pedeParede: dab 'Digite o numero da parede:', 0
+limpa:	dab '                                      ',0
+encerra: dab 'Programa encerrado.',0
+numeroParede: 0 db
+mensagemErro: dab 'Parede invalida.',0
+                              7 18 29
+informacaoParede1: dab 'Parede ',0
+informacaoParede2: dab ', Largura= ',0 
+informacaoParede3: dab ', Altura= ',0
+largura: 0 db
+altura:	 0 db
+                      67          18 19        30 31
+resultado1: dab 'Bons: ',0
+resultado2: dab ', danifs: ',0
+resultado3: dab ', vazios: ',0
+					13 14  16 17
+coordenadasDanificado: dab 'Coordenadas (  ,  ) - danificado',0
+coordenadasBom: dab 'Coordenadas (  ,  ) - bom',0
+coordenadasVazio: dab 'Coordenadas (  ,  ) - vazio',0
+
+bons: 0 db
+danificados: 0 db
+vazios: 0 db
+
+coordenadaX: 0 db
+coordenadaY: 0 db
+
+milhares: 0 db
+centenas: 0 db
+dezenas: 0 db
+unidades: 0 db
+
+paredeGLOBAL: 0 db
+larguraGLOBAL: 0 db
+alturaGLOBAL: 0 db
+
+sentido: 1 db
+
+dezmil: dab '10000',0
